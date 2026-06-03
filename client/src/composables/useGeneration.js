@@ -7,8 +7,8 @@ export function useGeneration() {
   const genStore = useGenerationStore();
   const error = ref(null);
 
-  const POLL_INTERVAL = 2000;
-  const MAX_POLL_TIME = 5 * 60 * 1000;
+  const POLL_INTERVAL = 4000;
+  const MAX_POLL_TIME = 10 * 60 * 1000;
 
   async function submitGeneration(type, model, prompt, media = [], parameters = {}) {
     error.value = null;

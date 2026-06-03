@@ -8,8 +8,13 @@ router.get('/', (req, res) => {
   res.json({ object: 'list', data: models });
 });
 
-// GET /v1/models/config - Get full config including API keys (for admin page)
+// GET /v1/models/config - Get full config including API keys (admin page, localhost only)
 router.get('/config', (req, res) => {
+  const host = req.get('host') || '';
+  // Only allow local access for security
+  if (!host.includes('localhost') && !host.includes('127.0.0.1') && host !== `localhost:${process.env.PORT || 3000}`) {
+    return res.status(403).json({ error: { message: 'Forbidden' } });
+  }
   const config = getConfig();
   res.json(config);
 });

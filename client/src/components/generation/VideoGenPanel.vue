@@ -109,7 +109,7 @@ function removeImage(index) {
         </t-button>
         <t-button variant="outline" @click="fileInput?.click()" :disabled="uploading">
           <template #icon><t-icon name="image" /></template>
-          首帧图
+          参考图
         </t-button>
       </div>
       <div v-if="error" style="color: #e34d59; font-size: 13px; margin-top: 8px;">{{ error }}</div>

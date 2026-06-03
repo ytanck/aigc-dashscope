@@ -8,7 +8,7 @@ import { useFileUpload } from '@/composables/useFileUpload';
 const chatStore = useChatStore();
 const modelStore = useModelStore();
 const modeStore = useModeStore();
-const { uploading, uploadFile, detectAtImage } = useFileUpload();
+const { uploading, uploadFile } = useFileUpload();
 
 const inputText = ref('');
 const attachedImages = ref([]);
@@ -35,24 +35,6 @@ watch(() => chatStore.lastMessage?.content, async () => {
 });
 
 function onSend() {
-  const text = inputText.value.trim();
-  const mention = detectAtImage(text);
-
-  if (mention) {
-    inputText.value = mention.cleanText;
-    if (mention.type === 'url' && mention.imageUrl) {
-      attachedImages.value.push({ url: mention.imageUrl });
-    } else if (mention.type === 'upload') {
-      fileInput.value?.click();
-      return;
-    }
-    // If there's remaining text after @image, send it
-    if (mention.cleanText || attachedImages.value.length > 0) {
-      doSend();
-    }
-    return;
-  }
-
   if (canSend.value) {
     doSend();
   }
@@ -102,9 +84,6 @@ function removeImage(index) {
         <div class="icon">💬</div>
         <h3>开始对话</h3>
         <p>输入消息开始与 AI 交流</p>
-        <p style="font-size: 12px; margin-top: 8px; color: #999;">
-          提示：输入 <code>@image</code> 可以上传图片，或 <code>@image URL</code> 引用在线图片
-        </p>
       </div>
 
       <div class="message-list" v-else>
@@ -164,7 +143,7 @@ function removeImage(index) {
         <textarea
           v-model="inputText"
           rows="1"
-          placeholder="输入消息，@image 附加上下文图片..."
+          placeholder="输入消息..."
           @keydown.enter.exact.prevent="onSend"
           style="flex: 1; resize: none; padding: 8px 12px; border: 1px solid #dcdcdc; border-radius: 6px; font-size: 14px; font-family: inherit; line-height: 1.5; outline: none; min-height: 38px; max-height: 130px;"
         />
