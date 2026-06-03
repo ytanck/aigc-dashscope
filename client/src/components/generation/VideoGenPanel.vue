@@ -28,10 +28,24 @@ async function onGenerate() {
 
   const model = modelStore.selectedModel[modeStore.currentMode];
 
-  const media = attachedImages.value.map((img, idx) => ({
-    url: img.url || img,
-    mediaType: idx === 0 ? 'first_frame' : 'refer'
-  }));
+  // Build media array:
+  // - First image -> first_frame (all models)
+  // - Additional images -> refer (omni only), skipped for standard models
+  const media = [];
+  if (attachedImages.value.length > 0) {
+    media.push({
+      url: attachedImages.value[0].url || attachedImages.value[0],
+      mediaType: 'first_frame'
+    });
+    // Only add refer images for omni models that support it
+    const maxRef = currentModel.value?.maxReferImages || 0;
+    for (let i = 1; i < attachedImages.value.length && media.length - 1 < maxRef; i++) {
+      media.push({
+        url: attachedImages.value[i].url || attachedImages.value[i],
+        mediaType: 'refer'
+      });
+    }
+  }
 
   await submitGeneration('video', model, prompt.value.trim(), media);
 }

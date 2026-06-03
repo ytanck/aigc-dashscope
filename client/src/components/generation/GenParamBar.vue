@@ -20,6 +20,7 @@ const showDuration = computed(() => modeStore.isVideoMode);
 const showAudio = computed(() => modeStore.isVideoMode && currentModel.value?.supportsAudio);
 
 const resolutionOptions = [
+  { value: '720p', label: '720P' },
   { value: '1k', label: '1K' },
   { value: '2k', label: '2K' },
   { value: '4k', label: '4K' }
