@@ -28,7 +28,7 @@ const emptyChatModel = () => ({
 
 const emptyImageModel = () => ({
   id: '', name: '', provider: 'kling', endpoint: 'https://dashscope.aliyuncs.com/api/v1/services/aigc/image-generation/generation',
-  apiKey: '', capabilities: ['text-to-image'],
+  apiKey: '', async: false, capabilities: ['text-to-image'],
   supportedResolutions: ['1k', '2k'],
   supportedAspectRatios: ['16:9', '9:16', '1:1'],
   maxN: 9
@@ -36,7 +36,7 @@ const emptyImageModel = () => ({
 
 const emptyVideoModel = () => ({
   id: '', name: '', provider: 'kling', endpoint: 'https://dashscope.aliyuncs.com/api/v1/services/aigc/video-generation/video-synthesis',
-  apiKey: '', capabilities: ['text-to-video'],
+  apiKey: '', async: false, capabilities: ['text-to-video'],
   supportedModes: ['std', 'pro'],
   supportedAspectRatios: ['16:9', '9:16', '1:1'],
   minDuration: 3, maxDuration: 15,
@@ -345,6 +345,10 @@ onMounted(loadConfig);
         <t-form-item label="最大生成数">
           <t-input-number v-model="formData.maxN" :min="1" :max="9" />
         </t-form-item>
+        <t-form-item label="异步模式">
+          <t-switch v-model="formData.async" />
+          <span style="margin-left: 8px; font-size: 12px; color: #999;">{{ formData.async ? '异步（需轮询任务）' : '同步（直接返回）' }}</span>
+        </t-form-item>
       </t-form>
     </t-dialog>
 
@@ -374,6 +378,10 @@ onMounted(loadConfig);
         </t-form-item>
         <t-form-item label="支持音频">
           <t-switch v-model="formData.supportsAudio" />
+        </t-form-item>
+        <t-form-item label="异步模式">
+          <t-switch v-model="formData.async" />
+          <span style="margin-left: 8px; font-size: 12px; color: #999;">{{ formData.async ? '异步（需轮询任务）' : '同步（直接返回）' }}</span>
         </t-form-item>
       </t-form>
     </t-dialog>

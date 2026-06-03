@@ -65,6 +65,7 @@ function getPublicModels() {
       name: m.name,
       provider: m.provider,
       capabilities: m.capabilities,
+      async: m.async === true,
       supportedResolutions: m.supportedResolutions,
       supportedAspectRatios: m.supportedAspectRatios,
       maxN: m.maxN
@@ -74,6 +75,7 @@ function getPublicModels() {
       name: m.name,
       provider: m.provider,
       capabilities: m.capabilities,
+      async: m.async === true,
       supportedModes: m.supportedModes,
       supportedAspectRatios: m.supportedAspectRatios,
       minDuration: m.minDuration,

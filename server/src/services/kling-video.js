@@ -9,6 +9,11 @@ function getApiKey(modelConfig) {
   return process.env.DASHSCOPE_API_KEY || cfg.dashscopeApiKey || '';
 }
 
+function isAsync(modelConfig) {
+  // Default to sync (false), only async if explicitly set to true
+  return modelConfig.async === true;
+}
+
 async function createVideoGeneration(req, res) {
   const { model, input, parameters } = req.body;
 
@@ -32,8 +37,7 @@ async function createVideoGeneration(req, res) {
     });
   }
 
-  // Build Kling video generation request
-  const klingRequest = {
+  const requestBody = {
     model: modelConfig.id,
     input: {
       prompt: input?.prompt || ''
@@ -47,36 +51,38 @@ async function createVideoGeneration(req, res) {
     }
   };
 
-  // Handle media (first_frame, last_frame, refer images) - convert local files to base64
   if (input?.media && Array.isArray(input.media)) {
-    klingRequest.input.media = await Promise.all(input.media.map(async (m) => ({
+    requestBody.input.media = await Promise.all(input.media.map(async (m) => ({
       ...m,
       url: await toBase64DataUri(m.url)
     })));
   }
 
-  // Handle negative prompt
   if (input?.negative_prompt) {
-    klingRequest.input.negative_prompt = input.negative_prompt;
+    requestBody.input.negative_prompt = input.negative_prompt;
   }
 
-  console.log('[video] Creating generation:', JSON.stringify(klingRequest, null, 2));
+  console.log('[video] Creating generation (async=%s):', isAsync(modelConfig), JSON.stringify(requestBody).slice(0, 300));
+
+  const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${apiKey}`
+  };
+  if (isAsync(modelConfig)) {
+    headers['X-DashScope-Async'] = 'enable';
+  }
 
   try {
     const response = await fetch(modelConfig.endpoint, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-        'X-DashScope-Async': 'enable'
-      },
-      body: JSON.stringify(klingRequest)
+      headers,
+      body: JSON.stringify(requestBody)
     });
 
     const data = await response.json();
 
     if (!response.ok || data.code) {
-      console.error('[video] Upstream error:', data);
+      console.error('[video] Upstream error:', JSON.stringify(data).slice(0, 500));
       return res.status(response.status || 500).json({
         error: {
           message: data.message || 'Video generation failed',
@@ -86,11 +92,37 @@ async function createVideoGeneration(req, res) {
       });
     }
 
+    // Async model: return task_id for polling
+    if (isAsync(modelConfig)) {
+      return res.json({
+        request_id: data.request_id,
+        output: {
+          task_id: data.output?.task_id || '',
+          task_status: data.output?.task_status || 'PENDING'
+        }
+      });
+    }
+
+    // Sync model: extract results directly
+    const results = [];
+    if (data.output?.video_url) {
+      results.push({
+        url: data.output.video_url,
+        coverUrl: data.output.watermark_video_url || data.output.video_url,
+        type: 'video'
+      });
+    }
+    if (data.output?.results) {
+      for (const r of data.output.results) {
+        results.push({ url: r.url || r.video_url, type: 'video' });
+      }
+    }
+
     return res.json({
       request_id: data.request_id,
       output: {
-        task_id: data.output?.task_id || '',
-        task_status: data.output?.task_status || 'PENDING'
+        results,
+        task_status: 'SUCCEEDED'
       }
     });
   } catch (err) {
@@ -116,9 +148,7 @@ async function queryVideoTask(req, res) {
   try {
     const response = await fetch(`${DASHSCOPE_TASK_URL}/${taskId}`, {
       method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`
-      }
+      headers: { 'Authorization': `Bearer ${apiKey}` }
     });
 
     const data = await response.json();

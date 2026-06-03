@@ -7,8 +7,8 @@ export function useGeneration() {
   const genStore = useGenerationStore();
   const error = ref(null);
 
-  const POLL_INTERVAL = 2000; // 2 seconds
-  const MAX_POLL_TIME = 5 * 60 * 1000; // 5 minutes
+  const POLL_INTERVAL = 2000;
+  const MAX_POLL_TIME = 5 * 60 * 1000;
 
   async function submitGeneration(type, model, prompt, media = [], parameters = {}) {
     error.value = null;
@@ -22,10 +22,7 @@ export function useGeneration() {
           model,
           prompt,
           referenceImages: refImages.length > 0 ? refImages : undefined,
-          parameters: {
-            ...genStore.genParams,
-            ...parameters
-          }
+          parameters: { ...genStore.genParams, ...parameters }
         });
       } else if (type === 'video') {
         const mediaList = media.map(m => ({
@@ -36,13 +33,23 @@ export function useGeneration() {
           model,
           prompt,
           media: mediaList.length > 0 ? mediaList : undefined,
-          parameters: {
-            ...genStore.genParams,
-            ...parameters
-          }
+          parameters: { ...genStore.genParams, ...parameters }
         });
       }
 
+      // Sync model: results returned directly, no task_id
+      if (response.output?.results && response.output?.task_status === 'SUCCEEDED') {
+        const newResults = response.output.results.map(r => ({
+          type: r.type || type,
+          url: r.url,
+          coverUrl: r.coverUrl || r.url
+        }));
+        genStore.addResults(null, newResults);
+        genStore.isGenerating = false;
+        return null;
+      }
+
+      // Async model: task_id returned, start polling
       const taskId = response.output?.task_id;
       if (!taskId) {
         throw new Error('No task ID returned');
@@ -90,10 +97,8 @@ export function useGeneration() {
         if (status === 'SUCCEEDED') {
           genStore.clearPollingTimer(taskId);
 
-          // Extract results
           const newResults = [];
           if (result.output?.video_url) {
-            // Video result
             newResults.push({
               type: 'video',
               url: result.output.video_url,
@@ -101,16 +106,11 @@ export function useGeneration() {
             });
           }
           if (result.output?.choices) {
-            // Image result
             for (const choice of result.output.choices) {
               const contents = choice.message?.content || [];
               for (const c of contents) {
                 if (c.type === 'image' && c.image) {
-                  newResults.push({
-                    type: 'image',
-                    url: c.image,
-                    coverUrl: c.image
-                  });
+                  newResults.push({ type: 'image', url: c.image, coverUrl: c.image });
                 }
               }
             }
@@ -129,10 +129,8 @@ export function useGeneration() {
           });
           genStore.isGenerating = false;
         }
-        // PENDING or RUNNING: continue polling
       } catch (err) {
         console.error('Poll error:', err);
-        // Skip this cycle, retry next
       }
     }, POLL_INTERVAL);
 

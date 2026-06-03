@@ -10,6 +10,11 @@ function getApiKey(modelConfig) {
   return process.env.DASHSCOPE_API_KEY || cfg.dashscopeApiKey || '';
 }
 
+function isAsync(modelConfig) {
+  // Default to sync (false), only async if explicitly set to true
+  return modelConfig.async === true;
+}
+
 async function createImageGeneration(req, res) {
   const { model, input, parameters } = req.body;
 
@@ -33,33 +38,27 @@ async function createImageGeneration(req, res) {
     });
   }
 
-  // Build Kling image generation request
-  // Kling API uses { text: "..." } and { image: "url" } format (NOT OpenAI format)
+  // Build content array (Kling format: { text: "..." } / { image: "url" })
   const content = [];
   if (input?.prompt) {
     content.push({ text: input.prompt });
   }
-  // Handle image references - convert local files to base64 (with resize)
   if (input?.reference_images && Array.isArray(input.reference_images)) {
     for (const refImg of input.reference_images) {
       const img = await toBase64DataUri(refImg);
       content.push({ image: img });
     }
   }
-  // Must have at least text or image
   if (content.length === 0) {
     return res.status(400).json({
       error: { message: 'At least one of prompt or reference_images is required', type: 'invalid_request_error' }
     });
   }
 
-  const klingRequest = {
+  const requestBody = {
     model: modelConfig.id,
     input: {
-      messages: [{
-        role: 'user',
-        content
-      }]
+      messages: [{ role: 'user', content }]
     },
     parameters: {
       n: parameters?.n || 1,
@@ -69,23 +68,27 @@ async function createImageGeneration(req, res) {
     }
   };
 
-  console.log('[image] Creating generation:', JSON.stringify(klingRequest, null, 2));
+  console.log('[image] Creating generation (async=%s):', isAsync(modelConfig), JSON.stringify(requestBody).slice(0, 300));
+
+  const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${apiKey}`
+  };
+  if (isAsync(modelConfig)) {
+    headers['X-DashScope-Async'] = 'enable';
+  }
 
   try {
     const response = await fetch(modelConfig.endpoint, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-        'X-DashScope-Async': 'enable'
-      },
-      body: JSON.stringify(klingRequest)
+      headers,
+      body: JSON.stringify(requestBody)
     });
 
     const data = await response.json();
 
     if (!response.ok || data.code) {
-      console.error('[image] Upstream error:', data);
+      console.error('[image] Upstream error:', JSON.stringify(data).slice(0, 500));
       return res.status(response.status || 500).json({
         error: {
           message: data.message || 'Image generation failed',
@@ -95,11 +98,37 @@ async function createImageGeneration(req, res) {
       });
     }
 
+    // Async model: return task_id for polling
+    if (isAsync(modelConfig)) {
+      return res.json({
+        request_id: data.request_id,
+        output: {
+          task_id: data.output?.task_id || '',
+          task_status: data.output?.task_status || 'PENDING'
+        }
+      });
+    }
+
+    // Sync model: extract results directly and return as SUCCEEDED
+    const results = [];
+    if (data.output?.results) {
+      for (const r of data.output.results) {
+        results.push({ url: r.url || r.image, type: 'image' });
+      }
+    } else if (data.output?.choices) {
+      for (const choice of data.output.choices) {
+        const contents = choice.message?.content || [];
+        for (const c of contents) {
+          if (c.image) results.push({ url: c.image, type: 'image' });
+        }
+      }
+    }
+
     return res.json({
       request_id: data.request_id,
       output: {
-        task_id: data.output?.task_id || '',
-        task_status: data.output?.task_status || 'PENDING'
+        results,
+        task_status: 'SUCCEEDED'
       }
     });
   } catch (err) {
@@ -114,7 +143,6 @@ async function queryImageTask(req, res) {
   const { taskId } = req.params;
   const { model: modelId } = req.query;
 
-  // Find the model to get API key
   let apiKey = process.env.DASHSCOPE_API_KEY;
   if (modelId) {
     const modelConfig = findImageModel(modelId);
@@ -126,9 +154,7 @@ async function queryImageTask(req, res) {
   try {
     const response = await fetch(`${DASHSCOPE_TASK_URL}/${taskId}`, {
       method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`
-      }
+      headers: { 'Authorization': `Bearer ${apiKey}` }
     });
 
     const data = await response.json();
