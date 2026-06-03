@@ -1,0 +1,73 @@
+{
+  "chat": [
+    {
+      "id": "gpt-4o",
+      "name": "GPT-4o",
+      "provider": "openai",
+      "endpoint": "https://api.openai.com/v1/chat/completions",
+      "apiKey": "sk-your-openai-api-key",
+      "capabilities": ["text", "vision"],
+      "defaultParams": {
+        "temperature": 0.7,
+        "max_tokens": 4096
+      }
+    }
+  ],
+  "image": [
+    {
+      "id": "kling/kling-v3-image-generation",
+      "name": "Kling V3 图像生成",
+      "provider": "kling",
+      "endpoint": "https://dashscope.aliyuncs.com/api/v1/services/aigc/image-generation/generation",
+      "apiKey": "",
+      "capabilities": ["text-to-image", "image-to-image"],
+      "supportedResolutions": ["1k", "2k"],
+      "supportedAspectRatios": ["16:9", "9:16", "1:1"],
+      "maxN": 9
+    },
+    {
+      "id": "kling/kling-v3-omni-image-generation",
+      "name": "Kling V3 Omni 图像生成",
+      "provider": "kling",
+      "endpoint": "https://dashscope.aliyuncs.com/api/v1/services/aigc/image-generation/generation",
+      "apiKey": "",
+      "capabilities": ["text-to-image", "image-to-image"],
+      "supportedResolutions": ["1k", "2k", "4k"],
+      "supportedAspectRatios": ["16:9", "9:16", "1:1"],
+      "maxN": 9
+    }
+  ],
+  "video": [
+    {
+      "id": "kling/kling-v3-video-generation",
+      "name": "Kling V3 视频生成",
+      "provider": "kling",
+      "endpoint": "https://dashscope.aliyuncs.com/api/v1/services/aigc/video-generation/video-synthesis",
+      "apiKey": "",
+      "capabilities": ["text-to-video", "image-to-video"],
+      "supportedModes": ["std", "pro"],
+      "supportedAspectRatios": ["16:9", "9:16", "1:1"],
+      "minDuration": 3,
+      "maxDuration": 15,
+      "supportsAudio": true,
+      "supportsFirstFrame": true,
+      "supportsLastFrame": false
+    },
+    {
+      "id": "kling/kling-v3-omni-video-generation",
+      "name": "Kling V3 Omni 视频生成",
+      "provider": "kling",
+      "endpoint": "https://dashscope.aliyuncs.com/api/v1/services/aigc/video-generation/video-synthesis",
+      "apiKey": "",
+      "capabilities": ["text-to-video", "image-to-video"],
+      "supportedModes": ["std", "pro"],
+      "supportedAspectRatios": ["16:9", "9:16", "1:1"],
+      "minDuration": 3,
+      "maxDuration": 15,
+      "supportsAudio": true,
+      "supportsFirstFrame": true,
+      "supportsLastFrame": true,
+      "maxReferImages": 7
+    }
+  ]
+}
