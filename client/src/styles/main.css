@@ -85,7 +85,7 @@ html, body, #app {
   display: flex;
   flex-direction: column;
   height: 100%;
-  max-width: 900px;
+  max-width: 1000px;
   margin: 0 auto;
   width: 100%;
 }
@@ -97,9 +97,8 @@ html, body, #app {
 }
 
 .chat-input-area {
-  padding: 16px 20px;
-  background: var(--bg-white);
-  border-top: 1px solid var(--border-color);
+  padding: 12px 20px 20px;
+  background: transparent;
 }
 
 /* Message bubbles */
@@ -184,7 +183,7 @@ html, body, #app {
   display: flex;
   flex-direction: column;
   height: 100%;
-  max-width: 900px;
+  max-width: 1000px;
   margin: 0 auto;
   width: 100%;
   padding: 20px;
@@ -192,6 +191,23 @@ html, body, #app {
 
 .gen-prompt-area {
   margin-bottom: 20px;
+}
+
+/* Arc-shaped input wrapper shared across all modes */
+.input-wrapper {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  border: 1px solid #00a1c2;
+  border-radius: 24px;
+  padding: 8px 12px;
+  box-shadow: 0 2px 16px rgba(0, 161, 194, 0.12);
+  background: var(--bg-white);
+  transition: box-shadow 0.2s;
+}
+
+.input-wrapper:focus-within {
+  box-shadow: 0 2px 20px rgba(0, 161, 194, 0.22);
 }
 
 .gen-results {

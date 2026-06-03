@@ -139,13 +139,13 @@ function removeImage(index) {
       />
 
       <!-- Input -->
-      <div style="display: flex; gap: 8px; align-items: flex-end;">
+      <div class="input-wrapper">
         <textarea
           v-model="inputText"
-          rows="1"
+          rows="2"
           placeholder="输入消息..."
           @keydown.enter.exact.prevent="onSend"
-          style="flex: 1; resize: none; padding: 8px 12px; border: 1px solid #dcdcdc; border-radius: 6px; font-size: 14px; font-family: inherit; line-height: 1.5; outline: none; min-height: 38px; max-height: 130px;"
+          style="flex: 1; resize: none; padding: 10px 14px; border: none; border-radius: 6px; font-size: 14px; font-family: inherit; line-height: 1.5; outline: none; min-height: 48px; max-height: 130px; background: transparent;"
         />
         <t-button
           v-if="!chatStore.isLoading"

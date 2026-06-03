@@ -77,13 +77,13 @@ function removeImage(index) {
       <input ref="fileInput" type="file" accept="image/png,image/jpeg,image/jpg,image/gif,image/webp" multiple
              style="display: none;" @change="handleFileSelect" />
 
-      <div style="display: flex; gap: 8px; align-items: flex-end;">
+      <div class="input-wrapper">
         <textarea
           v-model="prompt"
           rows="2"
           placeholder="描述你想要生成的图像..."
           @keydown.enter.exact.prevent="onGenerate"
-          style="flex: 1; resize: none; padding: 8px 12px; border: 1px solid #dcdcdc; border-radius: 6px; font-size: 14px; font-family: inherit; line-height: 1.5; outline: none; min-height: 52px; max-height: 110px;"
+          style="flex: 1; resize: none; padding: 10px 14px; border: none; border-radius: 6px; font-size: 14px; font-family: inherit; line-height: 1.5; outline: none; min-height: 48px; max-height: 110px; background: transparent;"
         />
         <t-button theme="primary" :disabled="genStore.isGenerating" @click="onGenerate">
           {{ genStore.isGenerating ? '生成中...' : '生成' }}
