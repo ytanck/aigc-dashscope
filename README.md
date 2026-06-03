@@ -14,13 +14,13 @@
 
 | 聊天对话 | 模型配置 |
 |:---:|:---:|
-| ![聊天模式](images/chat.png) | ![模型配置](images/config.png) |
+| ![聊天识图](images/chat.png) | ![模型配置](images/config.png) |
 
 | 图像生成 | 视频生成 |
 |:---:|:---:|
-| ![图像生成](images/text2image.png) | ![视频生成](images/video.png) |
+| ![图像生成](images/text2image.png) | ![图生视频](images/video.png) |
 
-> AIGC模型本人仅测试接入了可灵、通义万象、千问部分模型，百炼的AIGC模型这些就很不错了
+> AIGC模型本人仅测试接入了可灵、通义万象、千问部分模型，百炼的AIGC模型这些就很可以了。当然你要是有其他供应商的模型，只要是兼容openai接口的都可以接入使用。
 
 
 ## ✨ 功能特性
@@ -29,8 +29,8 @@
 |------|------|
 | 💬 **聊天对话** | OpenAI 兼容的流式 SSE 聊天，支持视觉识别（图片理解） |
 | 🎨 **图像生成** | 文生图 / 图生图，支持 Kling V3、Qwen-Image 等模型 |
-| 🎬 **视频生成** | 文生视频 / 图生视频，支持 Kling V3 / Omni 模型 |
-| ⚡ **异步轮询** | 自动检测同步/异步模型，异步任务自动 2 秒轮询 |
+| 🎬 **视频生成** | 文生视频 / 图生视频 / 首尾帧，支持 Kling V3 / Omni / Wan2.7 等模型 |
+| ⚡ **异步轮询** | 自动检测同步/异步模型，异步任务自动 4 秒轮询 |
 | 🖼️ **图片压缩** | 本地图片自动压缩转 base64，智能控制体积 |
 | 🛠️ **模型管理** | 可视化 CRUD 模型配置，支持自定义 API Key 和端点 |
 | 🌐 **代理转发** | 前端通过 Vite proxy 转发 API 请求，无需暴露后端地址 |
@@ -46,7 +46,7 @@
 
 ```bash
 git clone https://github.com/ytanck/aigc-dashscope.git
-cd ai-chat-studio
+cd aigc-dashscope
 ```
 
 ### 2. 配置模型
