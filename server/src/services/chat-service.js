@@ -1,4 +1,21 @@
 const { findChatModel } = require('../config');
+const { toBase64DataUri } = require('./image-utils');
+
+/**
+ * Recursively convert local image URLs in messages to base64 data URIs.
+ */
+async function convertLocalImages(messages) {
+  for (const msg of messages) {
+    if (typeof msg.content === 'string') continue;
+    if (!Array.isArray(msg.content)) continue;
+    for (const part of msg.content) {
+      if (part.type === 'image_url' && part.image_url?.url) {
+        part.image_url.url = await toBase64DataUri(part.image_url.url);
+      }
+    }
+  }
+  return messages;
+}
 
 async function handleChatCompletion(req, res) {
   const { model, messages, stream, temperature, max_tokens, top_p } = req.body;
@@ -26,10 +43,13 @@ async function handleChatCompletion(req, res) {
   const apiKey = modelConfig.apiKey;
   const defaults = modelConfig.defaultParams || {};
 
+  // Convert local image URLs to base64 before sending to upstream
+  const processedMessages = await convertLocalImages(messages);
+
   // Build request body with defaults
   const requestBody = {
-    model: model, // Pass through the model name
-    messages,
+    model: model,
+    messages: processedMessages,
     stream: stream || false,
     temperature: temperature ?? defaults.temperature ?? 0.7,
     max_tokens: max_tokens ?? defaults.max_tokens ?? 4096,
