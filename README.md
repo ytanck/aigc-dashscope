@@ -2,7 +2,7 @@
 
 > 🧪 **Vibe Coding Project** — 100% AI 辅助编码，由 [Claude Code](https://claude.ai/code) 驱动构建
 
-一个轻量级的 AI 创作工作室，提供 OpenAI 兼容的聊天对话、文本生成图像、图像生成图像、文本生成视频、图像生成视频功能。基于 **阿里云百炼 (DashScope)** 平台，通过 Vue 3 前端 + Node.js Express 后端实现。没有复杂的功能，不依赖数据库，数据全部配置在本地，本人主要用于生图生视频做短视频用，最适合aigc的同学使用。更多完整功能的ai工具github有很多优秀的项目。
+一个轻量级的 AI 创作工作室，提供 OpenAI 兼容的聊天对话、文本生成图像、图像生成图像、文本生成视频、图像生成视频功能。基于 **阿里云百炼 (DashScope)** 平台，通过 Vue 3 前端 + Node.js Express 后端实现。没有复杂的功能，不依赖数据库，数据全部配置在本地，作者主要用于生图生视频做短视频用，比较适合aigc的同学使用。更多完整功能的ai工具github有很多优秀的项目。
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Vue](https://img.shields.io/badge/Vue-3.5-42b883?logo=vue.js)](https://vuejs.org/)
@@ -101,6 +101,10 @@ npm run dev
 ### 5. 打开浏览器
 
 访问 **http://localhost:5173** 开始使用。
+
+### 6. or 新手一键启动方式
+
+双击执行 `start.bat`，会自动执行3-4步
 
 ---
 

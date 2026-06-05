@@ -1,0 +1,49 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get tag/version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          else
+            echo "VERSION=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create zip archive
+        run: |
+          git archive --format=zip --prefix=aigc-${{ steps.version.outputs.VERSION }}/ -o aigc-${{ steps.version.outputs.VERSION }}.zip HEAD
+
+      - name: Create tar.gz archive
+        run: |
+          git archive --format=tar.gz --prefix=aigc-${{ steps.version.outputs.VERSION }}/ -o aigc-${{ steps.version.outputs.VERSION }}.tar.gz HEAD
+
+      - name: Upload to release (tag push)
+        if: github.event_name == 'push'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.VERSION }}
+          files: |
+            aigc-${{ steps.version.outputs.VERSION }}.zip
+            aigc-${{ steps.version.outputs.VERSION }}.tar.gz
+
+      - name: Upload to existing release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            aigc-${{ steps.version.outputs.VERSION }}.zip
+            aigc-${{ steps.version.outputs.VERSION }}.tar.gz
