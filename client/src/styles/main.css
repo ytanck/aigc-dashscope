@@ -355,6 +355,9 @@ html, body, #app {
   padding-bottom: 8px;
   border-bottom: 2px solid var(--accent-color);
 }
+.t-radio-group {
+  background: var(--bg-white) !important;
+}
 
 /* Responsive */
 @media (max-width: 768px) {
